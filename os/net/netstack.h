@@ -127,8 +127,6 @@ struct network_driver {
   uint8_t (*output)(const linkaddr_t *localdest);
 };
 
-void dummy_receive_mac_packet(void);
-
 extern const struct routing_driver NETSTACK_ROUTING;
 extern const struct network_driver NETSTACK_NETWORK;
 extern const struct mac_driver NETSTACK_MAC;

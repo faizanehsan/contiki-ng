@@ -48,6 +48,11 @@ AUTOSTART_PROCESSES(&hello_world_process);
 /*---------------------------------------------------------------------------*/
 
 
+void dummy_receive_mac_packet(void)
+{
+	printf("Mac layer calls network call... which is suspended for now");
+}
+
 
 // dummy packet sent call for direct transmission of mac packet
 
@@ -84,7 +89,7 @@ PROCESS_THREAD(hello_world_process, ev, data)
 
     /* Provide a callback function to receive the result of
        a packet transmission. */
-    //NETSTACK_MAC.send(&dummy_packet_sent, NULL);
+    NETSTACK_MAC.send(&dummy_packet_sent, NULL);
 
 
     /* Wait for the periodic timer to expire and then restart the timer. */

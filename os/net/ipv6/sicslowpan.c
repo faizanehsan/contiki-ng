@@ -1418,31 +1418,31 @@ compress_hdr_ipv6(linkaddr_t *link_destaddr)
 /**
  * Callback function for the MAC packet sent callback
  */
-static void
-packet_sent(void *ptr, int status, int transmissions)
-{
-  const linkaddr_t *dest;
-
-  if(callback != NULL) {
-    callback->output_callback(status);
-  }
-  last_tx_status = status;
-
-  /* What follows only applies to unicast */
-  dest = packetbuf_addr(PACKETBUF_ADDR_RECEIVER);
-  if(linkaddr_cmp(dest, &linkaddr_null)) {
-    return;
-  }
-
-  /* Update neighbor link statistics */
-  link_stats_packet_sent(dest, status, transmissions);
-
-  /* Call routing protocol link callback */
-  NETSTACK_ROUTING.link_callback(dest, status, transmissions);
-
-  /* DS6 callback, used for UIP_DS6_LL_NUD */
-  uip_ds6_link_callback(status, transmissions);
-}
+//static void
+//packet_sent(void *ptr, int status, int transmissions)
+//{
+//  const linkaddr_t *dest;
+//
+//  if(callback != NULL) {
+//    callback->output_callback(status);
+//  }
+//  last_tx_status = status;
+//
+//  /* What follows only applies to unicast */
+//  dest = packetbuf_addr(PACKETBUF_ADDR_RECEIVER);
+//  if(linkaddr_cmp(dest, &linkaddr_null)) {
+//    return;
+//  }
+//
+//  /* Update neighbor link statistics */
+//  link_stats_packet_sent(dest, status, transmissions);
+//
+//  /* Call routing protocol link callback */
+//  NETSTACK_ROUTING.link_callback(dest, status, transmissions);
+//
+//  /* DS6 callback, used for UIP_DS6_LL_NUD */
+//  uip_ds6_link_callback(status, transmissions);
+//}
 /*--------------------------------------------------------------------*/
 /**
  * \brief This function is called by the 6lowpan code to send out a
@@ -1465,7 +1465,7 @@ send_packet(linkaddr_t *dest)
 
   /* Provide a callback function to receive the result of
      a packet transmission. */
-  NETSTACK_MAC.send(&packet_sent, NULL);
+//  NETSTACK_MAC.send(&packet_sent, NULL);
 
   /* If we are sending multiple packets in a row, we need to let the
      watchdog know that we are still alive. */

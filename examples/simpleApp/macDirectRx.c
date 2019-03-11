@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Swedish Institute of Computer Science.
+ * Copyright (c) 2006, Swedish Institute of Computer Science.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,62 +32,74 @@
 
 /**
  * \file
- *         Initialiation file for the Contiki low-layer network stack (NETSTACK)
+ *         A very simple Contiki application showing how Contiki programs look
  * \author
  *         Adam Dunkels <adam@sics.se>
  */
 
+#include "contiki.h"
 #include "net/netstack.h"
-#include "lib/list.h"
+#include "net/packetbuf.h"
+#include "net/linkaddr.h"
+#include <stdio.h> /* For printf() */
+/*---------------------------------------------------------------------------*/
+PROCESS(hello_world_process, "Hello world process");
+AUTOSTART_PROCESSES(&hello_world_process);
+/*---------------------------------------------------------------------------*/
 
-/* The list of IP processors that will process IP packets before uip or after */
-LIST(ip_processor_list);
 
-/* Note: localdest is only used for the output callback */
-enum netstack_ip_action
-netstack_process_ip_callback(uint8_t type, const linkaddr_t *localdest)
+void dummy_receive_mac_packet(void)
 {
-  enum netstack_ip_action action = NETSTACK_IP_PROCESS;
-  struct netstack_ip_packet_processor *p;
-  for(p = list_head(ip_processor_list);
-      p != NULL;
-      p = list_item_next(p)) {
-    if(type == NETSTACK_IP_OUTPUT) {
-      if(p->process_output != NULL) {
-        action = p->process_output(localdest);
-      }
-    } else if(type == NETSTACK_IP_INPUT) {
-      if(p->process_input != NULL) {
-        action = p->process_input();
-      }
-    }
-    /* if not NETSTACK_IP_PROCESS - quit and return the desired action */
-    if(action != NETSTACK_IP_PROCESS)
-      return action;
+	printf("Mac layer calls network call... which is suspended for now");
+}
+
+
+// dummy packet sent call for direct transmission of mac packet
+
+static void
+dummy_packet_sent(void *ptr, int status, int transmissions)
+{
+  printf("Status message: %d", status);
+}
+
+
+
+PROCESS_THREAD(hello_world_process, ev, data)
+{
+  static struct etimer timer;
+
+  linkaddr_t dest;
+
+  PROCESS_BEGIN();
+
+  /* Setup a periodic timer that expires after 10 seconds. */
+  etimer_set(&timer, CLOCK_SECOND * 10);
+
+  linkaddr_copy(&dest, &linkaddr_null);
+
+  /* Set the link layer destination address for the packet as a
+   * packetbuf attribute. The MAC layer can access the destination
+   * address with the function packetbuf_addr(PACKETBUF_ADDR_RECEIVER).
+  */
+  packetbuf_set_addr(PACKETBUF_ADDR_RECEIVER, &dest);
+
+  while(1) {
+    printf("Hello, world\n");
+
+
+    /* Provide a callback function to receive the result of
+       a packet transmission. */
+    //NETSTACK_MAC.send(&dummy_packet_sent, NULL);
+
+
+    /* Wait for the periodic timer to expire and then restart the timer. */
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&timer));
+    etimer_reset(&timer);
   }
-  return action;
-}
-/*---------------------------------------------------------------------------*/
-void
-netstack_ip_packet_processor_add(struct netstack_ip_packet_processor *p)
-{
-  if(p != NULL) {
-    list_add(ip_processor_list, p);
-  }
-}
-/*---------------------------------------------------------------------------*/
-void
-uip_ds6_ip_packet_processor_rm(struct netstack_ip_packet_processor *p)
-                               {
-  list_remove(ip_processor_list, p);
-}
 
-/*---------------------------------------------------------------------------*/
-void
-netstack_init(void)
-{
-  NETSTACK_RADIO.init();
-  NETSTACK_MAC.init();
-  //NETSTACK_NETWORK.init();
+  NETSTACK_MAC.send(&dummy_packet_sent, NULL);
+
+  PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
+

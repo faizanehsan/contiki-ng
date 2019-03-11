@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = udp-client udp-server macDirectTx
+CONTIKI_PROJECT = udp-client udp-server macDirectTx macDirectRx
 all: $(CONTIKI_PROJECT)
 
 CONTIKI=../..
